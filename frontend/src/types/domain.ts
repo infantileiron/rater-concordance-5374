@@ -1,0 +1,13 @@
+export interface User{email:string;role:string}
+export interface Level{code:string;label:string}
+export interface Task{task_id:string;group:string;ratings:Record<string,string|null>}
+export interface Dataset{id:string;name:string;source:string;raters:string[];tasks:Task[];created_at:string}
+export interface Scale{id:string;name:string;levels:Level[];created_at:string}
+export interface Study{id:string;name:string;dataset_id:string;scale_id:string;rater_ids:string[];created_at:string}
+export interface Pair{rater_a:string;rater_b:string;kappa:number|null;reason:string;n:number;matrix:number[][];marginal_a:number[];marginal_b:number[];observed_disagreement:number|null;expected_disagreement:number|null;exact_agreement:number|null}
+export interface Disagreement{task_id:string;group:string;codes:Record<string,string>;span:number;mean_pair_distance:number}
+export interface Result{raters:string[];levels:Level[];tasks_total:number;tasks_complete:number;tasks_isolated:number;isolated:{task_id:string;missing_raters:string[];reason:string}[];kendall:{value:number|null;reason:string;n:number;m:number;tie_correction:number;denominator:number;rank_sums:number[];ranks:number[][]};pairs:Pair[];estimable_pairs:number;mean_pair_kappa:number|null;disagreements:Disagreement[];rank_profile:{task_id:string;ranks:number[]}[];checksum:string;assumptions:string[]}
+export interface Run{id:string;study_id:string;status:string;result:Result;error:string;created_at:string}
+export interface Review{id:string;run_id:string;note:string;decision:string;author:string;created_at:string}
+export interface Report{id:string;run_id:string;title:string;published_by:string;created_at:string}
+export interface Audit{id:string;actor:string;action:string;status:number;created_at:string}

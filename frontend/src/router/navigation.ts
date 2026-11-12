@@ -1,0 +1,1 @@
+export const navigation=[{id:'overview',label:'评测总览',code:'01'},{id:'datasets',label:'盲评任务',code:'02'},{id:'scales',label:'有序标尺',code:'03'},{id:'studies',label:'评委组合',code:'04'},{id:'results',label:'一致性证据',code:'05'},{id:'reviews',label:'分歧复核',code:'06'}];

@@ -1,0 +1,74 @@
+name: ${COMPOSE_PROJECT_NAME:-rater-concordance}
+services:
+ db:
+  image: postgres:16-alpine
+  container_name: ${COMPOSE_PROJECT_NAME:-rater-concordance}-db
+  environment:
+   POSTGRES_USER: rater
+   POSTGRES_PASSWORD: rater-demo
+   POSTGRES_DB: rater
+  ports: ["${DB_PORT:-17722}:5432"]
+  volumes: ["db-data:/var/lib/postgresql/data"]
+  healthcheck:
+   test: ["CMD-SHELL", "pg_isready -U rater -d rater"]
+   interval: 3s
+   timeout: 3s
+   retries: 30
+ redis:
+  image: redis:7.4-alpine
+  container_name: ${COMPOSE_PROJECT_NAME:-rater-concordance}-redis
+  command: ["redis-server", "--appendonly", "yes"]
+  volumes: ["redis-data:/data"]
+  healthcheck:
+   test: ["CMD", "redis-cli", "ping"]
+   interval: 3s
+   timeout: 3s
+   retries: 30
+ backend:
+  build: ./backend
+  container_name: ${COMPOSE_PROJECT_NAME:-rater-concordance}-backend
+  environment: &backend-env
+   DATABASE_URL: postgresql+psycopg://rater:rater-demo@db/rater
+   REDIS_URL: redis://redis:6379/0
+   JWT_SECRET: ${JWT_SECRET:-rater-concordance-development-secret-change}
+   SEED_DEMO: ${SEED_DEMO:-true}
+  ports: ["${BACKEND_PORT:-19222}:8000"]
+  volumes: ["artifacts:/artifacts"]
+  depends_on:
+   db: {condition: service_healthy}
+   redis: {condition: service_healthy}
+  healthcheck:
+   test: ["CMD", "python", "-c", "import urllib.request;urllib.request.urlopen('http://127.0.0.1:8000/health')"]
+   interval: 3s
+   timeout: 3s
+   retries: 40
+ worker:
+  build: ./backend
+  container_name: ${COMPOSE_PROJECT_NAME:-rater-concordance}-worker
+  command: ["python", "-m", "src.worker"]
+  environment: *backend-env
+  volumes: ["artifacts:/artifacts"]
+  depends_on:
+   db: {condition: service_healthy}
+   redis: {condition: service_healthy}
+   backend: {condition: service_healthy}
+  healthcheck:
+   test: ["CMD", "python", "-c", "import os,time;assert time.time()-os.stat('/artifacts/worker-heartbeat').st_mtime<30"]
+   interval: 3s
+   timeout: 3s
+   retries: 40
+ frontend:
+  build: ./frontend
+  container_name: ${COMPOSE_PROJECT_NAME:-rater-concordance}-frontend
+  ports: ["${FRONTEND_PORT:-18222}:80"]
+  depends_on:
+   backend: {condition: service_healthy}
+  healthcheck:
+   test: ["CMD", "wget", "-q", "-O", "-", "http://127.0.0.1/"]
+   interval: 3s
+   timeout: 3s
+   retries: 30
+volumes:
+ db-data:
+ redis-data:
+ artifacts:

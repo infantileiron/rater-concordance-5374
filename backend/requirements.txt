@@ -1,0 +1,6 @@
+fastapi==0.115.14
+uvicorn==0.34.3
+SQLAlchemy==2.0.41
+psycopg[binary]==3.2.9
+redis==5.2.1
+PyJWT==2.10.1

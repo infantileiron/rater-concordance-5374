@@ -1,0 +1,3 @@
+import * as datasets from '../api/datasets';import * as scales from '../api/scales';import * as studies from '../api/studies';import * as runs from '../api/runs';import * as reviews from '../api/reviews';import * as reports from '../api/reports';import * as audit from '../api/audit';
+export async function loadWorkspace(){const [d,s,t,r,v,p,a]=await Promise.all([datasets.list(),scales.list(),studies.list(),runs.list(),reviews.list(),reports.list(),audit.list()]);return {datasets:d,scales:s,studies:t,runs:r,reviews:v,reports:p,audit:a}}
+export type Workspace=Awaited<ReturnType<typeof loadWorkspace>>;
